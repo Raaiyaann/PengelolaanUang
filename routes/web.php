@@ -34,7 +34,7 @@ Route::group(['middleware' => 'isAdmin','prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('monthly_reports', \App\Http\Controllers\Admin\MontlyReportController::class);
 });
 
-Auth::routes();
+Auth::routes(['confirm' => false, 'reset' => false, 'verify' => false]);
 
 Route::get('/home', function() {
     return view('home');

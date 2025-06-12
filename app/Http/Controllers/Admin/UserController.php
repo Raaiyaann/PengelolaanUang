@@ -27,35 +27,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        $roles = Role::pluck('title', 'id');
-
-        return response(view('admin.users.create', compact('roles')));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreUserRequest $request)
-    {
-        $user = User::create($request->validated() + ['password' => bcrypt($request->password)]);
-        $user->roles()->sync($request->input('roles'));
-
-        return response(
-            redirect()->route('admin.users.index')->with('message', "Successfully Created !")
-        );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function edit(User $user)
     {
         $roles = Role::pluck('title', 'id');
