@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\Admin\CurrencyRequest;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class CurrencyController extends Controller
 {
@@ -15,13 +17,13 @@ class CurrencyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         abort_if(Gate::denies('currency_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        $currencies = Currency::latest()->paginate(5);
+        $currencies = Currency::whereUserId(auth()->id())->latest()->paginate(5);
 
-        return response(view('admin.currencies.index', compact('currencies')));
+        return view('admin.currencies.index', compact('currencies'));
     }
 
     /**
@@ -29,11 +31,11 @@ class CurrencyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
         abort_if(Gate::denies('currency_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        return response(view('admin.currencies.create'));
+        return view('admin.currencies.create');
     }
 
     /**
@@ -42,18 +44,16 @@ class CurrencyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CurrencyRequest $request)
+    public function store(CurrencyRequest $request): RedirectResponse
     {
         abort_if(Gate::denies('currency_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        Currency::create($request->validated());
+        Currency::create($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.currencies.index')->with([
-                'message' => 'success created !',
-                'alert-info' => 'success'
-            ])
-        );
+        return redirect()->route('admin.currencies.index')->with([
+            'message' => 'success created !',
+            'alert-info' => 'success'
+        ]);
     }
 
     /**
@@ -62,11 +62,11 @@ class CurrencyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Currency $currency)
+    public function show(Currency $currency): View
     {
         abort_if(Gate::denies('currency_view'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        return response(view('admin.currencies.show', compact('currency')));
+        return view('admin.currencies.show', compact('currency'));
     }
 
     /**
@@ -75,11 +75,11 @@ class CurrencyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Currency $currency)
+    public function edit(Currency $currency): View
     {
         abort_if(Gate::denies('currency_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        return response(view('admin.currencies.edit', compact('currency')));
+        return view('admin.currencies.edit', compact('currency'));
     }
 
     /**
@@ -89,18 +89,16 @@ class CurrencyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(CurrencyRequest $request,Currency $currency)
+    public function update(CurrencyRequest $request, Currency $currency): RedirectResponse
     {
         abort_if(Gate::denies('currency_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
-        $currency->update($request->validated());
+        $currency->update($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.currencies.index')->with([
-                'message' => 'success updated !',
-                'alert-info' => 'info'
-            ])
-        );
+        return redirect()->route('admin.currencies.index')->with([
+            'message' => 'success updated !',
+            'alert-info' => 'info'
+        ]);
     }
 
     /**
@@ -109,17 +107,15 @@ class CurrencyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Currency $currency)
+    public function destroy(Currency $currency): RedirectResponse
     {
         abort_if(Gate::denies('currency_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         
         $currency->delete();
 
-        return response(
-            redirect()->back()->with([
-                'message' => 'success deleted !',
-                'alert-info' => 'danger'
-            ])
-        );
+        return redirect()->back()->with([
+            'message' => 'success deleted !',
+            'alert-info' => 'danger'
+        ]);
     }
 }

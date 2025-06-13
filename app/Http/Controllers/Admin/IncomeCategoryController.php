@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\IncomeCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\IncomeCategoryRequest;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class IncomeCategoryController extends Controller
 {
@@ -13,11 +15,11 @@ class IncomeCategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $income_categories = IncomeCategory::whereUserId(auth()->id())->latest()->paginate(5);
 
-        return response(view('admin.income_categories.index', compact('income_categories')));
+        return view('admin.income_categories.index', compact('income_categories'));
     }
 
     /**
@@ -25,9 +27,9 @@ class IncomeCategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        return response(view('admin.income_categories.create'));
+        return view('admin.income_categories.create');
     }
 
     /**
@@ -36,16 +38,14 @@ class IncomeCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(IncomeCategoryRequest $request)
+    public function store(IncomeCategoryRequest $request): RedirectResponse
     {
         IncomeCategory::create($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.income_categories.index')->with([
-                'message' => 'success created !',
-                'alert-info' => 'success'
-            ])
-        );
+        return redirect()->route('admin.income_categories.index')->with([
+            'message' => 'success created !',
+            'alert-info' => 'success'
+        ]);
     }
 
     /**
@@ -54,9 +54,9 @@ class IncomeCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(IncomeCategory $income_category)
+    public function show(IncomeCategory $income_category): View
     {
-        return response(view('admin.income_categories.show', compact('income_category')));
+        return view('admin.income_categories.show', compact('income_category'));
     }
 
     /**
@@ -65,9 +65,9 @@ class IncomeCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(IncomeCategory $income_category)
+    public function edit(IncomeCategory $income_category): View
     {
-        return response(view('admin.income_categories.edit', compact('income_category')));
+        return view('admin.income_categories.edit', compact('income_category'));
     }
 
     /**
@@ -77,16 +77,14 @@ class IncomeCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(IncomeCategoryRequest $request,IncomeCategory $income_category)
+    public function update(IncomeCategoryRequest $request, IncomeCategory $income_category): RedirectResponse
     {
         $income_category->update($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.income_categories.index')->with([
-                'message' => 'success updated !',
-                'alert-info' => 'info'
-            ])
-        );
+        return redirect()->route('admin.income_categories.index')->with([
+            'message' => 'success updated !',
+            'alert-info' => 'info'
+        ]);
     }
 
     /**
@@ -95,15 +93,13 @@ class IncomeCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(IncomeCategory $income_category)
+    public function destroy(IncomeCategory $income_category): RedirectResponse
     {
         $income_category->delete();
 
-        return response(
-            redirect()->back()->with([
-                'message' => 'success deleted !',
-                'alert-info' => 'danger'
-            ])
-        );
+        return redirect()->back()->with([
+            'message' => 'success deleted !',
+            'alert-info' => 'danger'
+        ]);
     }
 }

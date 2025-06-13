@@ -7,6 +7,7 @@ use App\Models\Income;
 use App\Models\Expense;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\View\View;
 
 class MontlyReportController extends Controller
 {
@@ -15,7 +16,7 @@ class MontlyReportController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $r)
+    public function index(Request $r): View
     {
         $from    = Carbon::parse(sprintf(
             '%s-%s-01',
@@ -64,7 +65,7 @@ class MontlyReportController extends Controller
             }
         }
 
-        return response()->view('admin.monthly_reports.index', compact(
+        return view('admin.monthly_reports.index', compact(
             'exp_summary',
             'inc_summary',
             'exp_total',
@@ -78,9 +79,9 @@ class MontlyReportController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        return response()->view('admin.monthly_reports.create');
+        return view('admin.monthly_reports.create');
     }
 
     /**

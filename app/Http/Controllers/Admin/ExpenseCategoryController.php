@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\ExpenseCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExpenseCategoryRequest;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ExpenseCategoryController extends Controller
 {
@@ -13,11 +15,11 @@ class ExpenseCategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $expense_categories = ExpenseCategory::whereUserId(auth()->id())->latest()->paginate(5);
 
-        return response(view('admin.expense_categories.index', compact('expense_categories')));
+        return view('admin.expense_categories.index', compact('expense_categories'));
     }
 
     /**
@@ -25,9 +27,9 @@ class ExpenseCategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        return response(view('admin.expense_categories.create'));
+        return view('admin.expense_categories.create');
     }
 
     /**
@@ -36,16 +38,14 @@ class ExpenseCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ExpenseCategoryRequest $request)
+    public function store(ExpenseCategoryRequest $request): RedirectResponse
     {
         ExpenseCategory::create($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.expense_categories.index')->with([
-                'message' => 'success created !',
-                'alert-info' => 'success'
-            ])
-        );
+        return redirect()->route('admin.expense_categories.index')->with([
+            'message' => 'success created !',
+            'alert-info' => 'success'
+        ]);
     }
 
     /**
@@ -54,9 +54,9 @@ class ExpenseCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ExpenseCategory $expense_category)
+    public function show(ExpenseCategory $expense_category): View
     {
-        return response(view('admin.expense_categories.show', compact('expense_category')));
+        return view('admin.expense_categories.show', compact('expense_category'));
     }
 
     /**
@@ -65,9 +65,9 @@ class ExpenseCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(ExpenseCategory $expense_category)
+    public function edit(ExpenseCategory $expense_category): View
     {
-        return response(view('admin.expense_categories.edit', compact('expense_category')));
+        return view('admin.expense_categories.edit', compact('expense_category'));
     }
 
     /**
@@ -77,16 +77,14 @@ class ExpenseCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ExpenseCategoryRequest $request,ExpenseCategory $expense_category)
+    public function update(ExpenseCategoryRequest $request,ExpenseCategory $expense_category): RedirectResponse
     {
         $expense_category->update($request->validated() + ['user_id' => auth()->id()]);
 
-        return response(
-            redirect()->route('admin.expense_categories.index')->with([
-                'message' => 'success updated !',
-                'alert-info' => 'info'
-            ])
-        );
+        return redirect()->route('admin.expense_categories.index')->with([
+            'message' => 'success updated !',
+            'alert-info' => 'info'
+        ]);
     }
 
     /**
@@ -95,15 +93,13 @@ class ExpenseCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ExpenseCategory $expense_category)
+    public function destroy(ExpenseCategory $expense_category): RedirectResponse
     {
         $expense_category->delete();
 
-        return response(
-            redirect()->back()->with([
-                'message' => 'success deleted !',
-                'alert-info' => 'danger'
-            ])
-        );
+        return redirect()->back()->with([
+            'message' => 'success deleted !',
+            'alert-info' => 'danger'
+        ]);
     }
 }

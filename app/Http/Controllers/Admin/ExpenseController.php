@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Currency;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExpenseRequest;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ExpenseController extends Controller
 {
@@ -14,11 +17,11 @@ class ExpenseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $expenses = Expense::whereUserId(auth()->id())->latest()->paginate(5);
 
-        return response(view('admin.expenses.index', compact('expenses')));
+        return view('admin.expenses.index', compact('expenses'));
     }
 
     /**
@@ -26,11 +29,12 @@ class ExpenseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        $expense_categories = ExpenseCategory::get()->pluck('name', 'id');
+        $expense_categories = ExpenseCategory::whereUserId(auth()->id())->pluck('name', 'id');
+        $currencies = Currency::all();
 
-        return response(view('admin.expenses.create', compact('expense_categories')));
+        return view('admin.expenses.create', compact('expense_categories', 'currencies'));
     }
 
     /**
@@ -39,19 +43,17 @@ class ExpenseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ExpenseRequest $request)
+    public function store(ExpenseRequest $request): RedirectResponse
     {
         Expense::create($request->validated() + [
                 'user_id' => auth()->id(),
                 'currency_id' => auth()->user()->currency_id,
             ]);
 
-        return response(
-            redirect()->route('admin.expenses.index')->with([
-                'message' => 'success created !',
-                'alert-info' => 'success'
-            ])
-        );
+        return redirect()->route('admin.expenses.index')->with([
+            'message' => 'success created !',
+            'alert-info' => 'success'
+        ]);
     }
 
     /**
@@ -60,9 +62,9 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Expense $expense)
+    public function show(Expense $expense): View
     {
-        return response(view('admin.expenses.show', compact('expense')));
+        return view('admin.expenses.show', compact('expense'));
     }
 
     /**
@@ -71,11 +73,12 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Expense $expense)
+    public function edit(Expense $expense): View
     {
-        $expense_categories = ExpenseCategory::get()->pluck('name', 'id')->prepend('please select');
+        $expense_categories = ExpenseCategory::whereUserId(auth()->id())->pluck('name', 'id');
+        $currencies = Currency::all();
 
-        return response(view('admin.expenses.edit', compact('expense', 'expense_categories')));
+        return view('admin.expenses.edit', compact('expense', 'expense_categories', 'currencies'));
     }
 
     /**
@@ -85,19 +88,17 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ExpenseRequest $request,Expense $expense)
+    public function update(ExpenseRequest $request, Expense $expense): RedirectResponse
     {
         $expense->update($request->validated() + [
                 'user_id' => auth()->id(),
                 'currency_id' => auth()->user()->currency_id,
             ]);
 
-        return response(
-            redirect()->route('admin.expenses.index')->with([
-                'message' => 'success updated !',
-                'alert-info' => 'info'
-            ])
-        );
+        return redirect()->route('admin.expenses.index')->with([
+            'message' => 'success updated !',
+            'alert-info' => 'info'
+        ]);
     }
 
     /**
@@ -106,15 +107,13 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Expense $expense)
+    public function destroy(Expense $expense): RedirectResponse
     {
         $expense->delete();
 
-        return response(
-            redirect()->back()->with([
-                'message' => 'success deleted !',
-                'alert-info' => 'danger'
-            ])
-        );
+        return redirect()->back()->with([
+            'message' => 'success deleted !',
+            'alert-info' => 'danger'
+        ]);
     }
 }

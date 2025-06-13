@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
@@ -15,11 +17,11 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $users = User::paginate(5);
 
-        return response(view('admin.users.index', compact('users')));
+        return view('admin.users.index', compact('users'));
     }
 
     /**
@@ -28,11 +30,11 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
    
-    public function edit(User $user)
+    public function edit(User $user): View
     {
         $roles = Role::pluck('title', 'id');
 
-        return response(view('admin.users.edit', compact('user','roles')));
+        return view('admin.users.edit', compact('user','roles'));
     }
 
     /**
@@ -42,14 +44,12 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request,User $user)
+    public function update(UpdateUserRequest $request,User $user): RedirectResponse
     {
         $user->update($request->validated() + ['password' => bcrypt($request->password)]);
         $user->roles()->sync($request->input('roles'));
 
-        return response(
-            redirect()->route('admin.users.index')->with('message',  "Successfully updated !")
-        );
+        return redirect()->route('admin.users.index')->with('message',  "Successfully updated !");
     }
 
     /**
@@ -58,12 +58,10 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
         $user->delete();
 
-        return response(
-            redirect()->route('admin.users.index')->with('message',  "Successfully deleted !")
-        );
+        return redirect()->route('admin.users.index')->with('message',  "Successfully deleted !");
     }
 }

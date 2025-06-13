@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Income;
 use App\Models\IncomeCategory;
+use App\Models\Currency;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\IncomeRequest;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class IncomeController extends Controller
 {
@@ -14,11 +17,11 @@ class IncomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $incomes = Income::whereUserId(auth()->id())->latest()->paginate(5);
 
-        return response()->view('admin.incomes.index', compact('incomes'));
+        return view('admin.incomes.index', compact('incomes'));
     }
 
     /**
@@ -26,11 +29,12 @@ class IncomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        $income_categories = IncomeCategory::get()->pluck('name', 'id');
+        $categories = IncomeCategory::whereUserId(auth()->id())->get();
+        $currencies = Currency::all();
 
-        return response()->view('admin.incomes.create', compact('income_categories'));
+        return view('admin.incomes.create', compact('categories', 'currencies'));
     }
 
     /**
@@ -39,19 +43,17 @@ class IncomeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(IncomeRequest $request)
+    public function store(IncomeRequest $request): RedirectResponse
     {
         Income::create($request->validated() + [
                 'user_id' => auth()->id(),
                 'currency_id' => auth()->user()->currency_id,
             ]);
 
-        return response(
-            redirect()->route('admin.incomes.index')->with([
-                'message' => 'success created !',
-                'alert-info' => 'success'
-            ])
-        );
+        return redirect()->route('admin.incomes.index')->with([
+            'message' => 'success created !',
+            'alert-info' => 'success'
+        ]);
     }
 
     /**
@@ -60,9 +62,9 @@ class IncomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Income $income)
+    public function show(Income $income): View
     {
-        return response()->view('admin.incomes.show', compact('income'));
+        return view('admin.incomes.show', compact('income'));
     }
 
     /**
@@ -71,11 +73,12 @@ class IncomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Income $income)
+    public function edit(Income $income): View
     {
-        $income_categories = IncomeCategory::get()->pluck('name', 'id');
+        $categories = IncomeCategory::whereUserId(auth()->id())->get();
+        $currencies = Currency::all();
 
-        return response()->view('admin.incomes.edit', compact('income', 'income_categories'));
+        return view('admin.incomes.edit', compact('income', 'categories', 'currencies'));
     }
 
     /**
@@ -85,19 +88,17 @@ class IncomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(IncomeRequest $request,Income $income)
+    public function update(IncomeRequest $request, Income $income): RedirectResponse
     {
         $income->update($request->validated() + [
                 'user_id' => auth()->id(),
                 'currency_id' => auth()->user()->currency_id,
             ]);
 
-        return response(
-            redirect()->route('admin.incomes.index')->with([
-                'message' => 'success updated !',
-                'alert-info' => 'info'
-            ])
-        );
+        return redirect()->route('admin.incomes.index')->with([
+            'message' => 'success updated !',
+            'alert-info' => 'info'
+        ]);
     }
 
     /**
@@ -106,15 +107,13 @@ class IncomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Income $income)
+    public function destroy(Income $income): RedirectResponse
     {
         $income->delete();
 
-        return response(
-            redirect()->back()->with([
-                'message' => 'success deleted !',
-                'alert-info' => 'danger'
-            ])
-        );
+        return redirect()->back()->with([
+            'message' => 'success deleted !',
+            'alert-info' => 'danger'
+        ]);
     }
 }
